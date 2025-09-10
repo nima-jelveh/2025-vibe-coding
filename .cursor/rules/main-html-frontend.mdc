@@ -1,6 +1,5 @@
 ---
-description:
-globs: frontend/**/*.*
+globs: *.html
 alwaysApply: false
 ---
 
