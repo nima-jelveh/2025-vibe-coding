@@ -4,16 +4,18 @@ Make the app into a to-do list app with these specifications.
 do not be fancy with parameterization, just use f-strings.
 Make the UI look crisp - minimalistic yet aesthetically pleasing.
 
-## Schema Derivation
+## Table Name Derivation
 
-The database schema is derived from the user's email address using this priority order:
+The database table name is derived from the user's email address using this priority order:
 
 1. **First priority**: Check the `X-Forwarded-Email` header from the request
 2. **Fallback**: Use the `MY_EMAIL` environment variable
 
-Once you have the email, derive the schema as: `email.split('@')[0].replace('.', '_')`
+Once you have the email, derive the table name prefix as: `email.split('@')[0].replace('.', '_')`, then suffix it with `_lists`.
 
-**Example**: If email is `john.doe@company.com`, the schema becomes `john_doe`.
+**Example**: If email is `john.doe@company.com`, the table name becomes `john_doe_lists`.
+
+**Schema**: All tables are in the `public` schema.
 
 ## Frontend & User Experience
 
@@ -32,13 +34,14 @@ Use HTML's new control flow syntax if it helps simplify your code.
 
 ## Backend
 
-### Schema Derivation in Code
+### Table Name Derivation in Code
 
 ```python
-def get_schema(request):
+def get_table_name(request):
     # Priority: header first, then env var
     email = request.headers.get("X-Forwarded-Email") or os.getenv("MY_EMAIL")
-    return email.split('@')[0].replace('.', '_')
+    prefix = email.split('@')[0].replace('.', '_')
+    return f"{prefix}_lists"
 ```
 
 ### Required Routes
@@ -72,14 +75,14 @@ Create a `lists_service.py` in the `/services` folder that exposes functions for
 
 **SECURITY WARNING**: Use simple f-strings for SQL queries instead of parameterized queries. This is less safe for production but acceptable for this demo. **CALL OUT TO ME IN ALL CAPS WHEN YOU IMPLEMENT THIS SO I REMEMBER THE SECURITY TRADEOFF.**
 
-The table is located at `<SCHEMA>.vibe_coding_lists` where `<SCHEMA>` is the derived schema from the user's email.
+The table is located at `public.<TABLE_NAME>` where `<TABLE_NAME>` is derived from the user's email (e.g., `public.john_doe_lists`).
 
 ### Database Schema
 
 this is the structure of the table. you can assume it's already been created.
 
 ```sql
-CREATE TABLE IF NOT EXISTS vibe_coding_lists (
+CREATE TABLE IF NOT EXISTS public.<prefix>_lists (
     id serial primary key,
     user_email TEXT NOT NULL,
     title TEXT NOT NULL,
@@ -89,3 +92,5 @@ CREATE TABLE IF NOT EXISTS vibe_coding_lists (
     updated_at TIMESTAMP NOT NULL DEFAULT now()
 );
 ```
+
+Where `<prefix>` is the user's email prefix (e.g., `john_doe` for `john.doe@company.com`).
