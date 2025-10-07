@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #0a0a0a 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #FF3621;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-shadow: 0 0 20px rgba(255, 54, 33, 0.3);
+        }
+
+        .card {
+            background: #1e1e1e;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            padding: 2rem;
+            margin-bottom: 1rem;
+            border: 1px solid #2a2a2a;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #2a2a2a;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #888;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab:hover {
+            color: #FF3621;
+        }
+
+        .tab.active {
+            color: #FF3621;
+            border-bottom-color: #FF3621;
+            font-weight: 600;
+        }
+
+        .create-section {
+            margin-bottom: 2rem;
+        }
+
+        .create-section h2 {
+            color: #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            color: #b0b0b0;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #2a2a2a;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            background: #0a0a0a;
+            color: #e0e0e0;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #666;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #FF3621;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            background: #FF3621;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(255, 54, 33, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 54, 33, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #3a3a3a;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .todo-list {
+            list-style: none;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            border-bottom: 1px solid #2a2a2a;
+            transition: background 0.2s;
+        }
+
+        .todo-item:hover {
+            background: #252525;
+        }
+
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 1rem;
+            margin-top: 0.25rem;
+            cursor: pointer;
+            accent-color: #FF3621;
+        }
+
+        .todo-content {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .todo-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #e0e0e0;
+            margin-bottom: 0.25rem;
+        }
+
+        .todo-item.completed .todo-title {
+            text-decoration: line-through;
+            color: #666;
+        }
+
+        .todo-description {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .todo-item.completed .todo-description {
+            color: #555;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid #2a2a2a;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .close-btn:hover {
+            color: #FF3621;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .error {
+            background: rgba(220, 53, 69, 0.2);
+            color: #ff6b6b;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ My Todo List</h1>
+
+        <div class="card">
+            <!-- Create New Todo -->
+            <div class="create-section">
+                <h2 style="margin-bottom: 1rem; color: #333;">Create New Task</h2>
+                <form id="createForm" onsubmit="createTodo(event)">
+                    <div class="form-group">
+                        <input type="text" id="newTitle" placeholder="Task title..." required>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="newDescription" placeholder="Description (optional)..."></textarea>
+                    </div>
+                    <button type="submit" class="btn">Add Task</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('active')">Active Tasks</button>
+                <button class="tab" onclick="switchTab('all')">All Tasks</button>
+            </div>
+
+            <!-- Todo List -->
+            <div id="todoList" class="loading">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="modal" onclick="closeModalOnBackdrop(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Task</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="editForm" onsubmit="updateTodo(event)">
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #666;">Title</label>
+                    <input type="text" id="editTitle" required>
+                </div>
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #666;">Description</label>
+                    <textarea id="editDescription"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-small">Save Changes</button>
+                    <button type="button" class="btn btn-small btn-danger" onclick="deleteTodo()">Delete</button>
+                    <button type="button" class="btn btn-small btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'active';
+        let currentTodoId = null;
+        let todos = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTodos();
+        });
+
+        async function loadTodos() {
+            try {
+                const includeCompleted = currentTab === 'all';
+                const response = await fetch(`/api/todos?include_completed=${includeCompleted}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+
+                todos = data.todos || [];
+                renderTodos();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function renderTodos() {
+            const todoList = document.getElementById('todoList');
+
+            if (todos.length === 0) {
+                todoList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <p>${currentTab === 'active' ? 'No active tasks. Create one above!' : 'No tasks yet.'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const todoItems = todos.map(todo => {
+                const isCompleted = todo[4] === 'completed'; // status is index 4
+                const isDeleted = todo[4] === 'deleted';
+                const title = escapeHtml(todo[2]); // title is index 2
+                const description = escapeHtml(todo[3] || ''); // description is index 3
+                const id = todo[0]; // id is index 0
+
+                return `
+                    <li class="todo-item ${isCompleted ? 'completed' : ''}" style="${isDeleted ? 'opacity: 0.5;' : ''}">
+                        <input type="checkbox" class="todo-checkbox" 
+                               ${isCompleted ? 'checked' : ''} 
+                               onchange="toggleComplete(${id}, this.checked)"
+                               ${isDeleted ? 'disabled' : ''}>
+                        <div class="todo-content" onclick="openDetailModal(${id})">
+                            <div class="todo-title">${title} ${isDeleted ? '(Deleted)' : ''}</div>
+                            ${description ? `<div class="todo-description">${description}</div>` : ''}
+                        </div>
+                    </li>
+                `;
+            }).join('');
+
+            todoList.innerHTML = `<ul class="todo-list">${todoItems}</ul>`;
+        }
+
+        async function createTodo(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('newTitle').value;
+            const description = document.getElementById('newDescription').value;
+
+            try {
+                const response = await fetch('/api/todos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, description })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                    return;
+                }
+
+                // Clear form
+                document.getElementById('createForm').reset();
+                
+                // Reload todos
+                await loadTodos();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        async function toggleComplete(id, checked) {
+            const status = checked ? 'completed' : 'pending';
+
+            try {
+                const response = await fetch(`/api/todos/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                    await loadTodos();
+                    return;
+                }
+
+                // Reload todos to update UI
+                await loadTodos();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                await loadTodos();
+            }
+        }
+
+        function openDetailModal(id) {
+            const todo = todos.find(t => t[0] === id);
+            if (!todo) return;
+
+            currentTodoId = id;
+            document.getElementById('editTitle').value = todo[2]; // title
+            document.getElementById('editDescription').value = todo[3] || ''; // description
+
+            document.getElementById('detailModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('show');
+            currentTodoId = null;
+        }
+
+        function closeModalOnBackdrop(event) {
+            if (event.target.id === 'detailModal') {
+                closeModal();
+            }
+        }
+
+        async function updateTodo(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('editTitle').value;
+            const description = document.getElementById('editDescription').value;
+
+            try {
+                const response = await fetch(`/api/todos/${currentTodoId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, description })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                    return;
+                }
+
+                closeModal();
+                await loadTodos();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        async function deleteTodo() {
+            if (!confirm('Are you sure you want to delete this task?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/todos/${currentTodoId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                    return;
+                }
+
+                closeModal();
+                await loadTodos();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // Update tab UI
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Reload todos
+            loadTodos();
+        }
+
+        function showError(message) {
+            const todoList = document.getElementById('todoList');
+            todoList.innerHTML = `<div class="error">Error: ${escapeHtml(message)}</div>`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
